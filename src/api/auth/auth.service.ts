@@ -72,7 +72,7 @@ export class AuthService {
         email: payload.email,
         firstName: payload.firstName,
         lastName: payload.lastName,
-        role: UserRole.USER,
+        role: UserRole.EMPLOYEE,
         department: payload.department,
         salry: payload.salary,
       });

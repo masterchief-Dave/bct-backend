@@ -11,6 +11,7 @@ extendZodWithOpenApi(z);
 export enum UserRole {
   ADMIN = "admin",
   USER = "user",
+  EMPLOYEE = "employee",
 }
 
 export type User = z.infer<typeof UserValidationSchema>;
@@ -18,7 +19,7 @@ export const UserValidationSchema = z.object({
   firstName: z.string().min(2).max(50),
   lastName: z.string().min(2).max(50),
   email: z.string().email(),
-  role: z.enum([UserRole.USER, UserRole.ADMIN]),
+  role: z.enum([UserRole.USER, UserRole.EMPLOYEE]),
   department: z.string().min(2).max(100),
   salary: z.number().positive(),
 });
@@ -82,7 +83,7 @@ const userSchema = new Schema<IUser>(
     role: {
       type: String,
       enum: Object.values(UserRole),
-      default: UserRole.USER,
+      default: UserRole.EMPLOYEE,
     },
     department: {
       type: String,
@@ -99,7 +100,7 @@ const userSchema = new Schema<IUser>(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 export const User = model<IUser>("User", userSchema);
