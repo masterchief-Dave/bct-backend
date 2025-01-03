@@ -17,4 +17,6 @@ export const env = cleanEnv(process.env, {
   JWT_SECRET: str({ devDefault: testOnly("secret") }),
   JWT_EXPIRES: str({ devDefault: testOnly("1h") }),
   JWT_COOKIE_EXPIRES_IN: num({ devDefault: testOnly(50) }),
+  ADMIN_EMAIL: str({ devDefault: testOnly("admin@example.com") }),
+  ADMIN_PASSWORD: str({ devDefault: testOnly("pass123") }),
 });

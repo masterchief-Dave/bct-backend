@@ -8,7 +8,7 @@ import { z } from "zod";
 
 extendZodWithOpenApi(z);
 
-enum UserRole {
+export enum UserRole {
   ADMIN = "admin",
   USER = "user",
 }
