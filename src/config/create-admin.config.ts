@@ -34,9 +34,7 @@ async function connectToDB(): Promise<void> {
   }
 }
 
-async function createAdminUser(
-  config: AdminConfig = defaultAdminConfig
-): Promise<void> {
+async function createAdminUser(config: AdminConfig = defaultAdminConfig): Promise<void> {
   try {
     const isAdminExisting = await User.findOne({ email: config.email });
     if (isAdminExisting) {
