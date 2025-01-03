@@ -5,7 +5,7 @@ import { z } from "zod";
 import { createApiResponse } from "@/api-docs/openAPIResponseBuilders";
 import { validateRequest } from "@/common/utils/httpHandlers";
 import { loginSchema, registerSchema } from "@/common/utils/schema";
-import { AuthValidationSchema } from "../user/user.model";
+import { AuthValidationSchema, UserRole } from "../user/user.model";
 import { authController } from "./auth.controller";
 
 export const authRegistry = new OpenAPIRegistry();
@@ -27,4 +27,10 @@ authRegistry.registerPath({
   responses: createApiResponse(z.array(AuthValidationSchema), "success"),
 });
 
-authRouter.post("/auth/register", validateRequest(registerSchema), authController.register);
+authRouter.post(
+  "/auth/register",
+  validateRequest(registerSchema),
+  authController.authenticate,
+  authController.restrictTo(UserRole.ADMIN),
+  authController.register,
+);

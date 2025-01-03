@@ -1,12 +1,15 @@
 import { ServiceResponse } from "@/common/models/serviceResponse";
+import { env } from "@/common/utils/envConfig";
+import type { Register } from "@/common/utils/schema";
 import { logger } from "@/server";
 import { StatusCodes } from "http-status-codes";
+import jwt, { type JwtPayload } from "jsonwebtoken";
 import { User } from "../user/user.model";
 
 export class AuthService {
   async login(email: string, password: string) {
     try {
-      const user = await User.findOne({ email });
+      const user = await User.findOne({ email }).select("+password");
       if (!user) {
         return ServiceResponse.failure("No user found", null, StatusCodes.NOT_FOUND);
       }
@@ -37,6 +40,34 @@ export class AuthService {
       logger.error(errorMessage);
       return ServiceResponse.failure(
         "An error occurred while authenticating user.",
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  // protected route
+  async register(payload: Register) {
+    // is the user an admin
+    //
+  }
+
+  async authenticate(payload: string) {
+    const isAuthenticated = false;
+    try {
+      const decoded = jwt.verify(payload, env.JWT_SECRET) as JwtPayload;
+      const user = await User.findById(decoded.id);
+      if (!user) return ServiceResponse.failure("Invalid user", null, StatusCodes.BAD_REQUEST);
+      if (user.changedPasswordAfter(decoded.iat!)) {
+        return ServiceResponse.failure("User recently changed password", null, StatusCodes.BAD_REQUEST);
+      }
+
+      return ServiceResponse.success("Success", { ...user }, StatusCodes.ACCEPTED);
+    } catch (error) {
+      const errorMessage = `Bad request $${(error as Error).message}`;
+      logger.error(errorMessage);
+      return ServiceResponse.failure(
+        "An error occurred while verifying user.",
         null,
         StatusCodes.INTERNAL_SERVER_ERROR,
       );

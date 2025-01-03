@@ -31,3 +31,5 @@ export const registerSchema = z.object({
   query: z.object({}).optional(),
   params: z.object({}).optional(),
 });
+
+export type Register = z.infer<typeof registerSchema>;
