@@ -1,4 +1,3 @@
-import { commonValidations } from "@/common/utils/commonValidation";
 import { env } from "@/common/utils/envConfig";
 import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
 import argon2 from "argon2";
@@ -19,9 +18,20 @@ export const UserValidationSchema = z.object({
   firstName: z.string().min(2).max(50),
   lastName: z.string().min(2).max(50),
   email: z.string().email(),
-  role: z.enum([UserRole.USER, UserRole.EMPLOYEE]),
+  role: z.enum([UserRole.USER, UserRole.EMPLOYEE, UserRole.ADMIN]),
   department: z.string().min(2).max(100),
   salary: z.number().positive(),
+  password: z.string().min(6),
+  joinedAt: z.date(),
+});
+
+export const UserUpdateValidationSchema = z.object({
+  firstName: z.string().min(2).max(50).optional(),
+  lastName: z.string().min(2).max(50).optional(),
+  email: z.string().email().optional(),
+  role: z.enum([UserRole.USER, UserRole.EMPLOYEE, UserRole.ADMIN]).optional(),
+  department: z.string().min(2).max(100).optional(),
+  salary: z.number().positive().optional(),
 });
 
 export const AuthValidationSchema = z.object({
@@ -38,6 +48,7 @@ interface IUser extends Document {
   role: UserRole;
   department: string;
   salary: number;
+  joinedAt: Date;
   createdAt: Date;
   updatedAt: Date;
   getJwtToken: () => string;
@@ -47,10 +58,12 @@ interface IUser extends Document {
 }
 
 // Input Validation for 'GET users/:id' endpoint
+// export const GetUserSchema = z.object({
+//   params: z.object({ id: commonValidations.id }),
+// });
 export const GetUserSchema = z.object({
-  params: z.object({ id: commonValidations.id }),
+  params: z.object({ id: z.string() }),
 });
-
 const userSchema = new Schema<IUser>(
   {
     firstName: {
@@ -97,13 +110,17 @@ const userSchema = new Schema<IUser>(
       required: true,
       min: 0,
     },
+    joinedAt: {
+      type: Date,
+      required: true,
+      default: Date.now,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-export const User = model<IUser>("User", userSchema);
 export const validateUserData = async (userData: unknown) => {
   try {
     const validateData = UserValidationSchema.parse(userData);
@@ -114,6 +131,9 @@ export const validateUserData = async (userData: unknown) => {
 };
 
 userSchema.methods.comparePassword = async function (password: string) {
+  if (!this.password) {
+    throw new Error("Password field not selected");
+  }
   return await argon2.verify(this.password, password);
 };
 
@@ -122,3 +142,15 @@ userSchema.methods.getJwtToken = function () {
     expiresIn: env.JWT_EXPIRES,
   });
 };
+
+userSchema.methods.changedPasswordAfter = function (JwtTimestamp: number) {
+  if (this.passwordChangedAt) {
+    const changedTimestamp = Math.floor(
+      this.passwordChangedAt.getTime() / 1000
+    );
+    return JwtTimestamp < changedTimestamp;
+  }
+  return false;
+};
+
+export const User = model<IUser>("User", userSchema);

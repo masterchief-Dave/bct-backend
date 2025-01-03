@@ -1,9 +1,10 @@
 import { env } from "@/common/utils/envConfig";
 import { cookieExpiry } from "@/common/utils/lib.utils";
-import type { Register } from "@/common/utils/schema";
 import type { NextFunction, Request, RequestHandler, Response } from "express";
-import { authService } from "./auth.service";
 import { StatusCodes } from "http-status-codes";
+import { authService } from "./auth.service";
+import { logger } from "@/server";
+import { User } from "../user/user.model";
 
 class AuthController {
   public login: RequestHandler = async (req: Request, res: Response) => {
@@ -14,16 +15,16 @@ class AuthController {
       return res.status(response.statusCode).json(response);
     }
 
-    res
-      .status(StatusCodes.ACCEPTED)
-      .json(response)
-      .cookie("auth.token", response.responseObject!.token as string, {
+    return res
+      .status(StatusCodes.OK)
+      .cookie("auth_token", response.responseObject!.token as string, {
         expires: cookieExpiry,
         httpOnly: true,
         secure: env.NODE_ENV !== "development",
         sameSite: "strict" as const,
         path: "/",
-      });
+      })
+      .json(response);
   };
 
   public register: RequestHandler = async (req: Request, res: Response) => {
@@ -44,8 +45,8 @@ class AuthController {
     next: NextFunction
   ) => {
     let token: string | null;
-    if (String(req.headers.Authorization).startsWith("Bearer ")) {
-      token = req.headers.authorization || null;
+    if (String(req.headers.authorization).startsWith("Bearer ")) {
+      token = req.headers.authorization?.split(" ")[1] || null;
     } else {
       token = req.headers.cookie || null;
     }
@@ -61,18 +62,17 @@ class AuthController {
       return res.status(response.statusCode).json(response);
     }
 
-    req.user = response;
+    req.user = response.responseObject as User;
     next();
   };
 
   public restrictTo = (...roles: string[]) => {
     return async (req: Request, res: Response, next: NextFunction) => {
-      if (req.user && !roles.includes(req.user.role)) {
+      if (req.user && !roles.includes(req.user._doc.role)) {
         return res.status(StatusCodes.FORBIDDEN).json({
           message: "You do not have permission to perform this action",
         });
       }
-
       next();
     };
   };

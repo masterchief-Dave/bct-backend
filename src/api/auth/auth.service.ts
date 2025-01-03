@@ -10,6 +10,7 @@ export class AuthService {
   async login(email: string, password: string) {
     try {
       const user = await User.findOne({ email }).select("+password");
+
       if (!user) {
         return ServiceResponse.failure(
           "No user found",
@@ -41,9 +42,10 @@ export class AuthService {
           },
           token,
         },
-        StatusCodes.ACCEPTED
+        StatusCodes.OK
       );
     } catch (error) {
+      console.log({error})
       const errorMessage = `Error authenticating user: $${
         (error as Error).message
       }`;
@@ -74,7 +76,9 @@ export class AuthService {
         lastName: payload.lastName,
         role: UserRole.EMPLOYEE,
         department: payload.department,
-        salry: payload.salary,
+        salary: payload.salary,
+        password: payload.password,
+        joinedAt: payload.joinedAt,
       });
       if (!user) {
         return ServiceResponse.failure(
@@ -86,7 +90,7 @@ export class AuthService {
 
       return ServiceResponse.success(
         "Success",
-        { ...user },
+        { ...user.toObject(), password: "__" },
         StatusCodes.CREATED
       );
     } catch (error) {
@@ -101,7 +105,6 @@ export class AuthService {
   }
 
   async authenticate(payload: string) {
-    const isAuthenticated = false;
     try {
       const decoded = jwt.verify(payload, env.JWT_SECRET) as JwtPayload;
       const user = await User.findById(decoded.id);
@@ -119,12 +122,9 @@ export class AuthService {
         );
       }
 
-      return ServiceResponse.success(
-        "Success",
-        { ...user },
-        StatusCodes.ACCEPTED
-      );
+      return ServiceResponse.success("Success", { ...user }, StatusCodes.OK);
     } catch (error) {
+      console.log(error);
       const errorMessage = `Bad request $${(error as Error).message}`;
       logger.error(errorMessage);
       return ServiceResponse.failure(

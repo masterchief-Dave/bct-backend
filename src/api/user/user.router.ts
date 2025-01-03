@@ -3,7 +3,11 @@ import express, { type Router } from "express";
 import { z } from "zod";
 
 import { createApiResponse } from "@/api-docs/openAPIResponseBuilders";
-import { GetUserSchema, UserValidationSchema } from "@/api/user/user.model";
+import {
+  GetUserSchema,
+  UserUpdateValidationSchema,
+  UserValidationSchema,
+} from "@/api/user/user.model";
 import { validateRequest } from "@/common/utils/httpHandlers";
 import { userController } from "./user.controller";
 
@@ -19,7 +23,7 @@ userRegistry.registerPath({
   responses: createApiResponse(z.array(UserValidationSchema), "Success"),
 });
 
-userRouter.get("/", userController.getUsers);
+userRouter.get("/", userController.getUsersByRole);
 
 userRegistry.registerPath({
   method: "get",
@@ -30,3 +34,20 @@ userRegistry.registerPath({
 });
 
 userRouter.get("/:id", validateRequest(GetUserSchema), userController.getUser);
+
+userRegistry.registerPath({
+  method: "patch",
+  path: "/users/{id}",
+  tags: ["User"],
+  request: {
+    body: {
+      content: { "application/json": { schema: UserUpdateValidationSchema } },
+    },
+  },
+  responses: createApiResponse(UserValidationSchema, "Success"),
+});
+userRouter.patch(
+  "/:id",
+  validateRequest(UserUpdateValidationSchema),
+  userController.updateEmployeeRecord
+);
