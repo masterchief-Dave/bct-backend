@@ -3,6 +3,7 @@ import { cookieExpiry } from "@/common/utils/lib.utils";
 import type { Register } from "@/common/utils/schema";
 import type { NextFunction, Request, RequestHandler, Response } from "express";
 import { authService } from "./auth.service";
+import { StatusCodes } from "http-status-codes";
 
 class AuthController {
   public login: RequestHandler = async (req: Request, res: Response) => {
@@ -14,7 +15,7 @@ class AuthController {
     }
 
     res
-      .status(200)
+      .status(StatusCodes.ACCEPTED)
       .json(response)
       .cookie("auth.token", response.responseObject!.token as string, {
         expires: cookieExpiry,
@@ -26,11 +27,22 @@ class AuthController {
   };
 
   public register: RequestHandler = async (req: Request, res: Response) => {
-    const payload: Register = req.body;
+    const payload = req.body;
     const response = await authService.register(payload);
+    if (!response.success) {
+      return res.status(response.statusCode).json(response);
+    }
+
+    res
+      .status(StatusCodes.CREATED)
+      .json({ message: "User created", data: { ...response.responseObject } });
   };
 
-  public authenticate: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+  public authenticate: RequestHandler = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     let token: string | null;
     if (String(req.headers.Authorization).startsWith("Bearer ")) {
       token = req.headers.authorization || null;
@@ -38,11 +50,15 @@ class AuthController {
       token = req.headers.cookie || null;
     }
 
-    if (!token) return res.status(401).json({ message: "Login to access resource", statusCode: 401 });
+    if (!token)
+      return res.status(StatusCodes.UNAUTHORIZED).json({
+        message: "Login to access resource",
+        statusCode: StatusCodes.UNAUTHORIZED,
+      });
 
     const response = await authService.authenticate(token);
     if (!response.success) {
-      return res.status(401).json({ message: "User not found" });
+      return res.status(response.statusCode).json(response);
     }
 
     req.user = response;
@@ -52,7 +68,7 @@ class AuthController {
   public restrictTo = (...roles: string[]) => {
     return async (req: Request, res: Response, next: NextFunction) => {
       if (req.user && !roles.includes(req.user.role)) {
-        return res.status(403).json({
+        return res.status(StatusCodes.FORBIDDEN).json({
           message: "You do not have permission to perform this action",
         });
       }
