@@ -1,13 +1,15 @@
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import express, { type Router } from "express";
-import { z } from "zod";
 
 import { createApiResponse } from "@/api-docs/openAPIResponseBuilders";
 import { validateRequest } from "@/common/utils/httpHandlers";
-import { loginSchema, registerSchema } from "@/common/utils/schema";
-import { AuthValidationSchema, UserRole } from "../user/user.model";
+import {
+  AuthValidationSchema,
+  loginSchema,
+  registerSchema,
+} from "@/common/utils/schema";
+import { UserRole } from "../user/user.model";
 import { authController } from "./auth.controller";
-import { logger } from "@/server";
 
 export const authRegistry = new OpenAPIRegistry();
 export const authRouter: Router = express.Router();

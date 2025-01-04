@@ -40,7 +40,9 @@ class UserController {
     const id = req.params.id as string;
     const payload = req.body as User;
     const response = await userService.updateEmployeeRecord(id, payload);
-    console.log(response);
+    if (!response.success) {
+      return res.status(response.statusCode).json(response);
+    }
     return handleServiceResponse(response, res);
   };
 

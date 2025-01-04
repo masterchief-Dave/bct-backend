@@ -1,5 +1,10 @@
-import { UserRole } from "@/api/user/user.model";
 import { z } from "zod";
+
+enum UserRole {
+  ADMIN = "admin",
+  USER = "user",
+  EMPLOYEE = "employee",
+}
 
 export const loginSchema = z.object({
   body: z.object({
@@ -32,6 +37,43 @@ export const registerSchema = z.object({
 
 export type Login = z.infer<typeof loginSchema>;
 export type Register = z.infer<typeof registerSchema>;
+
+export const UserValidationSchema = z.object({
+  firstName: z.string().min(2).max(50),
+  lastName: z.string().min(2).max(50),
+  email: z.string().email(),
+  role: z.enum([UserRole.USER, UserRole.EMPLOYEE, UserRole.ADMIN]),
+  department: z.string().min(2).max(100),
+  salary: z.number().positive(),
+  password: z.string().min(6),
+  joinedAt: z.date(),
+});
+
+export const UserUpdateValidationSchema = z.object({
+  firstName: z.string().min(2).max(50).optional(),
+  lastName: z.string().min(2).max(50).optional(),
+  email: z.string().email().optional(),
+  role: z.enum([UserRole.USER, UserRole.EMPLOYEE, UserRole.ADMIN]).optional(),
+  department: z.string().min(2).max(100).optional(),
+  salary: z.number().positive().optional(),
+});
+
+export const EmployeeUpdateValidationSchema = z.object({
+  firstName: z.string().min(2).max(50).optional(),
+  lastName: z.string().min(2).max(50).optional(),
+  email: z.string().email().optional(),
+  department: z.string().min(2).max(100).optional(),
+});
+
+export const AuthValidationSchema = z.object({
+  data: UserValidationSchema,
+  token: z.string(),
+  createdAt: z.date(),
+});
+
+export const GetUserSchema = z.object({
+  params: z.object({ id: z.string() }),
+});
 
 /**
  * export const registerSchema = z.object({

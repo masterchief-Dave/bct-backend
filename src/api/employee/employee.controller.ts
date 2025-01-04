@@ -1,6 +1,7 @@
 import { Request, RequestHandler, Response } from "express";
 import { employeeService } from "./employee.service";
 import { ExtendedUser } from "../user/user.model";
+import { handleServiceResponse } from "@/common/utils/httpHandlers";
 
 class EmployeeController {
   public updateEmployeeRecord: RequestHandler = async (
@@ -14,11 +15,11 @@ class EmployeeController {
       req.body
     );
 
-    // if (!response.success) {
-    //   return res.status(response.statusCode).json(response);
-    // }
+    if (!response.success) {
+      return res.status(response.statusCode).json(response);
+    }
 
-    // return handleServiceResponse(response, res);
+    return handleServiceResponse(response, res);
   };
 }
 

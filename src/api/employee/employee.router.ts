@@ -9,6 +9,8 @@ import {
 } from "@/common/utils/schema";
 import { validateRequest } from "@/common/utils/httpHandlers";
 import { employeeController } from "./employee.controller";
+import { authController } from "../auth/auth.controller";
+import { UserRole } from "../user/user.model";
 
 export const employeeRegistry = new OpenAPIRegistry();
 export const employeeRouter: Router = express.Router();
@@ -30,5 +32,6 @@ employeeRegistry.registerPath({
 employeeRouter.patch(
   "/:id",
   validateRequest(EmployeeUpdateValidationSchema),
+  authController.restrictTo(UserRole.EMPLOYEE),
   employeeController.updateEmployeeRecord
 );

@@ -83,7 +83,7 @@ export class UserService {
     try {
       const user = await User.findByIdAndUpdate({ _id: id }, payload, {
         new: true,
-      });
+      }).select("-password");
       if (!user) {
         return ServiceResponse.failure(
           "User not found",

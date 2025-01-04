@@ -3,13 +3,13 @@ import express, { type Router } from "express";
 import { z } from "zod";
 
 import { createApiResponse } from "@/api-docs/openAPIResponseBuilders";
+import { UserRole } from "@/api/user/user.model";
+import { validateRequest } from "@/common/utils/httpHandlers";
 import {
   GetUserSchema,
-  UserRole,
   UserUpdateValidationSchema,
   UserValidationSchema,
-} from "@/api/user/user.model";
-import { validateRequest } from "@/common/utils/httpHandlers";
+} from "@/common/utils/schema";
 import { authController } from "../auth/auth.controller";
 import { userController } from "./user.controller";
 
