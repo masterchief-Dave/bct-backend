@@ -102,6 +102,25 @@ export class UserService {
       );
     }
   }
+
+  async deleteUser(id: string) {
+    try {
+      await User.findByIdAndDelete(id);
+      return ServiceResponse.success(
+        "User deleted",
+        null,
+        StatusCodes.NO_CONTENT
+      );
+    } catch (ex) {
+      const errorMessage = `Error deleting user $${(ex as Error).message}`;
+      logger.error(errorMessage);
+      return ServiceResponse.failure(
+        `An error occurred while deleting user.`,
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
 }
 
 export const userService = new UserService();

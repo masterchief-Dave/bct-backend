@@ -5,10 +5,12 @@ import { z } from "zod";
 import { createApiResponse } from "@/api-docs/openAPIResponseBuilders";
 import {
   GetUserSchema,
+  UserRole,
   UserUpdateValidationSchema,
   UserValidationSchema,
 } from "@/api/user/user.model";
 import { validateRequest } from "@/common/utils/httpHandlers";
+import { authController } from "../auth/auth.controller";
 import { userController } from "./user.controller";
 
 export const userRegistry = new OpenAPIRegistry();
@@ -50,4 +52,18 @@ userRouter.patch(
   "/:id",
   validateRequest(UserUpdateValidationSchema),
   userController.updateEmployeeRecord
+);
+
+userRegistry.registerPath({
+  method: "delete",
+  path: "/users/{id}",
+  tags: ["User"],
+  responses: createApiResponse(UserValidationSchema, "Success"),
+});
+
+userRouter.delete(
+  "/:id",
+  validateRequest(GetUserSchema),
+  authController.restrictTo(UserRole.ADMIN),
+  userController.deleteUser
 );

@@ -36,6 +36,12 @@ class UserController {
     return handleServiceResponse(response, res);
   };
 
+  public deleteUser: RequestHandler = async (req: Request, res: Response) => {
+    const id = req.params.id as string;
+    const response = await userService.deleteUser(id);
+    return handleServiceResponse(response, res);
+  };
+
   // public getUsers: RequestHandler = async (req: Request, res: Response) => {
   //   const { role } = req.query;
   //   let response;

@@ -5,6 +5,7 @@ import { logger } from "@/server";
 import { StatusCodes } from "http-status-codes";
 import jwt, { type JwtPayload } from "jsonwebtoken";
 import { User, UserRole } from "../user/user.model";
+import argon2 from "argon2";
 
 export class AuthService {
   async login(email: string, password: string) {
@@ -45,7 +46,7 @@ export class AuthService {
         StatusCodes.OK
       );
     } catch (error) {
-      console.log({error})
+      console.log({ error });
       const errorMessage = `Error authenticating user: $${
         (error as Error).message
       }`;
@@ -70,6 +71,7 @@ export class AuthService {
           StatusCodes.CONFLICT
         );
       }
+      const hashedPassword = await argon2.hash(payload.password);
       const user = await User.create({
         email: payload.email,
         firstName: payload.firstName,
@@ -77,7 +79,7 @@ export class AuthService {
         role: UserRole.EMPLOYEE,
         department: payload.department,
         salary: payload.salary,
-        password: payload.password,
+        password: hashedPassword,
         joinedAt: payload.joinedAt,
       });
       if (!user) {

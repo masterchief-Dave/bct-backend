@@ -1,6 +1,7 @@
 import cors from "cors";
 import express, { type Express } from "express";
 import helmet from "helmet";
+import mongoose from "mongoose";
 import { pino } from "pino";
 
 import { openAPIRouter } from "@/api-docs/openAPIRouter";
@@ -11,8 +12,6 @@ import rateLimiter from "@/common/middleware/rateLimiter";
 import requestLogger from "@/common/middleware/requestLogger";
 import { env } from "@/common/utils/envConfig";
 import { authRouter } from "./api/auth/auth.router";
-
-import mongoose from "mongoose";
 
 const logger = pino({ name: "server start" });
 const app: Express = express();
