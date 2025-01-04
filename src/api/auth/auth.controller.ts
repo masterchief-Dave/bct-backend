@@ -33,7 +33,7 @@ class AuthController {
       return res.status(response.statusCode).json(response);
     }
 
-    res
+    return res
       .status(StatusCodes.CREATED)
       .json({ message: "User created", data: { ...response.responseObject } });
   };
@@ -63,6 +63,16 @@ class AuthController {
 
     req.user = response.responseObject as ExtendedUser;
     next();
+  };
+
+  public getSession: RequestHandler = async (req: Request, res: Response) => {
+    if (!req.user) {
+      return res.status(StatusCodes.UNAUTHORIZED).json({
+        message: "Login to access resource",
+        statusCode: StatusCodes.UNAUTHORIZED,
+      });
+    }
+    return res.status(StatusCodes.OK).json(req.user._doc);
   };
 
   public restrictTo = (...roles: string[]) => {

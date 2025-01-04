@@ -7,8 +7,8 @@ import {
   AuthValidationSchema,
   loginSchema,
   registerSchema,
+  UserRoleEnum,
 } from "@/common/utils/schema";
-import { UserRole } from "../user/user.model";
 import { authController } from "./auth.controller";
 
 export const authRegistry = new OpenAPIRegistry();
@@ -44,6 +44,12 @@ authRouter.post(
   "/register",
   validateRequest(registerSchema),
   authController.authenticate,
-  authController.restrictTo(UserRole.ADMIN),
+  authController.restrictTo(UserRoleEnum.ADMIN),
   authController.register
+);
+
+authRouter.get(
+  "/session",
+  authController.authenticate,
+  authController.getSession
 );

@@ -4,7 +4,8 @@ import { logger } from "@/server";
 import argon2 from "argon2";
 import { StatusCodes } from "http-status-codes";
 import jwt, { type JwtPayload } from "jsonwebtoken";
-import { User, UserRole } from "../user/user.model";
+import { User } from "../user/user.model";
+import { UserRoleEnum } from "@/common/utils/schema";
 
 export class AuthService {
   async login(email: string, password: string) {
@@ -75,7 +76,7 @@ export class AuthService {
         email: payload.email,
         firstName: payload.firstName,
         lastName: payload.lastName,
-        role: UserRole.EMPLOYEE,
+        role: UserRoleEnum.EMPLOYEE,
         department: payload.department,
         salary: payload.salary,
         password: hashedPassword,

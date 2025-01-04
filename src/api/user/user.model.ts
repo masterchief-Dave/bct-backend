@@ -1,5 +1,9 @@
 import { env } from "@/common/utils/envConfig";
-import { UserValidationSchema } from "@/common/utils/schema";
+import {
+  DepartmentEnum,
+  UserRoleEnum,
+  UserValidationSchema,
+} from "@/common/utils/schema";
 import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
 import argon2 from "argon2";
 import jwt from "jsonwebtoken";
@@ -8,24 +12,18 @@ import { z } from "zod";
 
 extendZodWithOpenApi(z);
 
-export enum UserRole {
-  ADMIN = "admin",
-  USER = "user",
-  EMPLOYEE = "employee",
-}
-
 export type User = z.infer<typeof UserValidationSchema>;
 export type ExtendedUser = User & {
   _id: string;
 };
 
-interface IUser extends Document {
+export interface IUser extends Document {
   firstName: string;
   lastName: string;
   password: string;
   email: string;
-  role: UserRole;
-  department: string;
+  role: UserRoleEnum;
+  department: DepartmentEnum;
   salary: number;
   joinedAt: Date;
   createdAt: Date;
@@ -35,7 +33,6 @@ interface IUser extends Document {
   changedPasswordAfter: (JwtTimestamp: number) => boolean;
   generatePasswordResetToken: () => string;
 }
-
 
 const userSchema = new Schema<IUser>(
   {
@@ -68,15 +65,14 @@ const userSchema = new Schema<IUser>(
     },
     role: {
       type: String,
-      enum: Object.values(UserRole),
-      default: UserRole.EMPLOYEE,
+      enum: Object.values(UserRoleEnum),
+      default: UserRoleEnum.EMPLOYEE,
     },
     department: {
       type: String,
       required: true,
       trim: true,
-      minlength: 2,
-      maxlength: 100,
+      enum: Object.values(DepartmentEnum),
     },
     salary: {
       type: Number,
