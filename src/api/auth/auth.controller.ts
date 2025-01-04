@@ -3,8 +3,7 @@ import { cookieExpiry } from "@/common/utils/lib.utils";
 import type { NextFunction, Request, RequestHandler, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { authService } from "./auth.service";
-import { logger } from "@/server";
-import { User } from "../user/user.model";
+import { ExtendedUser } from "../user/user.model";
 
 class AuthController {
   public login: RequestHandler = async (req: Request, res: Response) => {
@@ -34,7 +33,7 @@ class AuthController {
       return res.status(response.statusCode).json(response);
     }
 
-    res
+    return res
       .status(StatusCodes.CREATED)
       .json({ message: "User created", data: { ...response.responseObject } });
   };
@@ -62,8 +61,18 @@ class AuthController {
       return res.status(response.statusCode).json(response);
     }
 
-    req.user = response.responseObject as User;
+    req.user = response.responseObject as ExtendedUser;
     next();
+  };
+
+  public getSession: RequestHandler = async (req: Request, res: Response) => {
+    if (!req.user) {
+      return res.status(StatusCodes.UNAUTHORIZED).json({
+        message: "Login to access resource",
+        statusCode: StatusCodes.UNAUTHORIZED,
+      });
+    }
+    return res.status(StatusCodes.OK).json(req.user._doc);
   };
 
   public restrictTo = (...roles: string[]) => {
@@ -97,17 +106,5 @@ export const authController = new AuthController();
         })
     }
   )
-
-  static restrictTo = (...roles: string[]) => {
-    return (req: Request, _res: Response, next: NextFunction) => {
-      if (req.user && !roles.includes(req.user.role)) {
-        return next(
-          new AppError("You do not have permission to perform this action", 403)
-        )
-      }
-
-      next()
-    }
-  }
 
  */

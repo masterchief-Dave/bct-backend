@@ -40,7 +40,9 @@ class UserController {
     const id = req.params.id as string;
     const payload = req.body as User;
     const response = await userService.updateEmployeeRecord(id, payload);
-    console.log(response);
+    if (!response.success) {
+      return res.status(response.statusCode).json(response);
+    }
     return handleServiceResponse(response, res);
   };
 
@@ -49,14 +51,6 @@ class UserController {
     const response = await userService.deleteUser(id);
     return handleServiceResponse(response, res);
   };
-
-  // public getUsers: RequestHandler = async (req: Request, res: Response) => {
-  //   const { role } = req.query;
-  //   let response;
-  //   response = await userService.findAllByRole(String(role));
-
-  //   return handleServiceResponse(response, res);
-  // };
 }
 
 export const userController = new UserController();

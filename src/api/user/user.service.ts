@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 
-import { User } from "@/api/user/user.model";
+import { ExtendedUser, IUser, User } from "@/api/user/user.model";
 import { ServiceResponse } from "@/common/models/serviceResponse";
 import { logger } from "@/server";
 
@@ -83,7 +83,7 @@ export class UserService {
     try {
       const user = await User.findByIdAndUpdate({ _id: id }, payload, {
         new: true,
-      });
+      }).select("-password");
       if (!user) {
         return ServiceResponse.failure(
           "User not found",

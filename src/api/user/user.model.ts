@@ -1,4 +1,9 @@
 import { env } from "@/common/utils/envConfig";
+import {
+  DepartmentEnum,
+  UserRoleEnum,
+  UserValidationSchema,
+} from "@/common/utils/schema";
 import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
 import argon2 from "argon2";
 import jwt from "jsonwebtoken";
@@ -7,46 +12,18 @@ import { z } from "zod";
 
 extendZodWithOpenApi(z);
 
-export enum UserRole {
-  ADMIN = "admin",
-  USER = "user",
-  EMPLOYEE = "employee",
-}
-
 export type User = z.infer<typeof UserValidationSchema>;
-export const UserValidationSchema = z.object({
-  firstName: z.string().min(2).max(50),
-  lastName: z.string().min(2).max(50),
-  email: z.string().email(),
-  role: z.enum([UserRole.USER, UserRole.EMPLOYEE, UserRole.ADMIN]),
-  department: z.string().min(2).max(100),
-  salary: z.number().positive(),
-  password: z.string().min(6),
-  joinedAt: z.date(),
-});
+export type ExtendedUser = User & {
+  _id: string;
+};
 
-export const UserUpdateValidationSchema = z.object({
-  firstName: z.string().min(2).max(50).optional(),
-  lastName: z.string().min(2).max(50).optional(),
-  email: z.string().email().optional(),
-  role: z.enum([UserRole.USER, UserRole.EMPLOYEE, UserRole.ADMIN]).optional(),
-  department: z.string().min(2).max(100).optional(),
-  salary: z.number().positive().optional(),
-});
-
-export const AuthValidationSchema = z.object({
-  data: UserValidationSchema,
-  token: z.string(),
-  createdAt: z.date(),
-});
-
-interface IUser extends Document {
+export interface IUser extends Document {
   firstName: string;
   lastName: string;
   password: string;
   email: string;
-  role: UserRole;
-  department: string;
+  role: UserRoleEnum;
+  department: DepartmentEnum;
   salary: number;
   joinedAt: Date;
   createdAt: Date;
@@ -57,13 +34,6 @@ interface IUser extends Document {
   generatePasswordResetToken: () => string;
 }
 
-// Input Validation for 'GET users/:id' endpoint
-// export const GetUserSchema = z.object({
-//   params: z.object({ id: commonValidations.id }),
-// });
-export const GetUserSchema = z.object({
-  params: z.object({ id: z.string() }),
-});
 const userSchema = new Schema<IUser>(
   {
     firstName: {
@@ -95,15 +65,14 @@ const userSchema = new Schema<IUser>(
     },
     role: {
       type: String,
-      enum: Object.values(UserRole),
-      default: UserRole.EMPLOYEE,
+      enum: Object.values(UserRoleEnum),
+      default: UserRoleEnum.EMPLOYEE,
     },
     department: {
       type: String,
       required: true,
       trim: true,
-      minlength: 2,
-      maxlength: 100,
+      enum: Object.values(DepartmentEnum),
     },
     salary: {
       type: Number,

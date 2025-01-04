@@ -1,13 +1,15 @@
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import express, { type Router } from "express";
-import { z } from "zod";
 
 import { createApiResponse } from "@/api-docs/openAPIResponseBuilders";
 import { validateRequest } from "@/common/utils/httpHandlers";
-import { loginSchema, registerSchema } from "@/common/utils/schema";
-import { AuthValidationSchema, UserRole } from "../user/user.model";
+import {
+  AuthValidationSchema,
+  loginSchema,
+  registerSchema,
+  UserRoleEnum,
+} from "@/common/utils/schema";
 import { authController } from "./auth.controller";
-import { logger } from "@/server";
 
 export const authRegistry = new OpenAPIRegistry();
 export const authRouter: Router = express.Router();
@@ -42,6 +44,12 @@ authRouter.post(
   "/register",
   validateRequest(registerSchema),
   authController.authenticate,
-  authController.restrictTo(UserRole.ADMIN),
+  authController.restrictTo(UserRoleEnum.ADMIN),
   authController.register
+);
+
+authRouter.get(
+  "/session",
+  authController.authenticate,
+  authController.getSession
 );
