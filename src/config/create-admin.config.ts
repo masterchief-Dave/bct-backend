@@ -22,17 +22,17 @@ const defaultAdminConfig: AdminConfig = {
   salary: 1,
 };
 
-async function connectToDB(): Promise<void> {
-  try {
-    const uri = env.MONGODB_URI;
-    if (!uri) throw new Error("MongoDB uri is not defined");
-    await mongoose.connect(uri);
-    console.log("📦 Connected to MongoDB");
-  } catch (error) {
-    logger.error("MongoDB connection error: ", error);
-    process.exit(1);
-  }
-}
+ async function connectToDB(): Promise<void> {
+   try {
+     const uri = env.MONGODB_URI;
+     if (!uri) throw new Error("MongoDB uri is not defined");
+     await mongoose.connect(uri);
+     console.log("📦 Connected to MongoDB");
+   } catch (error) {
+     logger.error("MongoDB connection error: ", error);
+     process.exit(1);
+   }
+ }
 
 async function createAdminUser(config: AdminConfig = defaultAdminConfig): Promise<void> {
   try {
