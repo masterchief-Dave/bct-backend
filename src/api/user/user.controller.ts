@@ -11,7 +11,15 @@ class UserController {
   ) => {
     const { role } = req.query;
     let response;
-    response = await userService.findAllByRole(String(role));
+    if (!role) {
+      response = await userService.findAll();
+    } else {
+      response = await userService.findAllByRole(String(role));
+    }
+
+    if (!response.success) {
+      return res.status(response.statusCode).json(response);
+    }
 
     return handleServiceResponse(response, res);
   };

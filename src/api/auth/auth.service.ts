@@ -1,11 +1,10 @@
 import { ServiceResponse } from "@/common/models/serviceResponse";
 import { env } from "@/common/utils/envConfig";
-import type { Register } from "@/common/utils/schema";
 import { logger } from "@/server";
+import argon2 from "argon2";
 import { StatusCodes } from "http-status-codes";
 import jwt, { type JwtPayload } from "jsonwebtoken";
 import { User, UserRole } from "../user/user.model";
-import argon2 from "argon2";
 
 export class AuthService {
   async login(email: string, password: string) {
