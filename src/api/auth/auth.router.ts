@@ -47,3 +47,9 @@ authRouter.post(
   authController.restrictTo(UserRoleEnum.ADMIN),
   authController.register
 );
+
+authRouter.get(
+  "/session",
+  authController.authenticate,
+  authController.getSession
+);

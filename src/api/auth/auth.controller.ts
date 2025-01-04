@@ -65,6 +65,16 @@ class AuthController {
     next();
   };
 
+  public getSession: RequestHandler = async (req: Request, res: Response) => {
+    if (!req.user) {
+      return res.status(StatusCodes.UNAUTHORIZED).json({
+        message: "Login to access resource",
+        statusCode: StatusCodes.UNAUTHORIZED,
+      });
+    }
+    return res.status(StatusCodes.OK).json(req.user._doc);
+  };
+
   public restrictTo = (...roles: string[]) => {
     return async (req: Request, res: Response, next: NextFunction) => {
       if (req.user && !roles.includes(req.user._doc.role)) {
