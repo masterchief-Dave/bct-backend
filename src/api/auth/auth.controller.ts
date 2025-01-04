@@ -33,7 +33,7 @@ class AuthController {
       return res.status(response.statusCode).json(response);
     }
 
-    res
+    return res
       .status(StatusCodes.CREATED)
       .json({ message: "User created", data: { ...response.responseObject } });
   };

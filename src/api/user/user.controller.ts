@@ -51,14 +51,6 @@ class UserController {
     const response = await userService.deleteUser(id);
     return handleServiceResponse(response, res);
   };
-
-  // public getUsers: RequestHandler = async (req: Request, res: Response) => {
-  //   const { role } = req.query;
-  //   let response;
-  //   response = await userService.findAllByRole(String(role));
-
-  //   return handleServiceResponse(response, res);
-  // };
 }
 
 export const userController = new UserController();

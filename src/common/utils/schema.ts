@@ -1,9 +1,18 @@
 import { z } from "zod";
+import { createCaseInsensitiveEnum } from "./lib.utils";
 
-enum UserRole {
+export enum UserRoleEnum {
   ADMIN = "admin",
   USER = "user",
   EMPLOYEE = "employee",
+}
+
+export enum DepartmentEnum {
+  HR = "hr",
+  OPERATIONS = "operations",
+  MARKETING = "marketing",
+  SALES = "sales",
+  ENGINEERING = "engineering",
 }
 
 export const loginSchema = z.object({
@@ -21,8 +30,14 @@ export const registerSchema = z.object({
     lastName: z.string().min(2, "Last name must be at least 2 characters"),
     email: z.string().email("Invalid email format"),
     password: z.string().min(6, "Password must be at least 6 characters"),
-    role: z.enum([UserRole.EMPLOYEE]),
-    department: z.string(),
+    role: z.enum([UserRoleEnum.EMPLOYEE]),
+    department: z.enum([
+      DepartmentEnum.HR,
+      DepartmentEnum.OPERATIONS,
+      DepartmentEnum.MARKETING,
+      DepartmentEnum.SALES,
+      DepartmentEnum.ENGINEERING,
+    ]),
     salary: z.number().positive(),
     joinedAt: z.preprocess((arg) => {
       if (typeof arg === "string") {
@@ -42,8 +57,16 @@ export const UserValidationSchema = z.object({
   firstName: z.string().min(2).max(50),
   lastName: z.string().min(2).max(50),
   email: z.string().email(),
-  role: z.enum([UserRole.USER, UserRole.EMPLOYEE, UserRole.ADMIN]),
-  department: z.string().min(2).max(100),
+  role: createCaseInsensitiveEnum(
+    UserRoleEnum,
+    `Invalid role. Must be one of: ${Object.values(UserRoleEnum).join(", ")}`
+  ).optional(),
+  department: createCaseInsensitiveEnum(
+    DepartmentEnum,
+    `Invalid department. Must be one of: ${Object.values(DepartmentEnum).join(
+      ", "
+    )}`
+  ).optional(),
   salary: z.number().positive(),
   password: z.string().min(6),
   joinedAt: z.date(),
@@ -53,8 +76,16 @@ export const UserUpdateValidationSchema = z.object({
   firstName: z.string().min(2).max(50).optional(),
   lastName: z.string().min(2).max(50).optional(),
   email: z.string().email().optional(),
-  role: z.enum([UserRole.USER, UserRole.EMPLOYEE, UserRole.ADMIN]).optional(),
-  department: z.string().min(2).max(100).optional(),
+  role: createCaseInsensitiveEnum(
+    UserRoleEnum,
+    `Invalid role. Must be one of: ${Object.values(UserRoleEnum).join(", ")}`
+  ).optional(),
+  department: createCaseInsensitiveEnum(
+    DepartmentEnum,
+    `Invalid department. Must be one of: ${Object.values(DepartmentEnum).join(
+      ", "
+    )}`
+  ).optional(),
   salary: z.number().positive().optional(),
 });
 
@@ -62,7 +93,12 @@ export const EmployeeUpdateValidationSchema = z.object({
   firstName: z.string().min(2).max(50).optional(),
   lastName: z.string().min(2).max(50).optional(),
   email: z.string().email().optional(),
-  department: z.string().min(2).max(100).optional(),
+  department: createCaseInsensitiveEnum(
+    DepartmentEnum,
+    `Invalid department. Must be one of: ${Object.values(DepartmentEnum).join(
+      ", "
+    )}`
+  ).optional(),
 });
 
 export const AuthValidationSchema = z.object({
@@ -73,6 +109,26 @@ export const AuthValidationSchema = z.object({
 
 export const GetUserSchema = z.object({
   params: z.object({ id: z.string() }),
+});
+
+export interface DepartmentCount {
+  department: string;
+  count: number;
+}
+
+export interface AnalyticsData {
+  totalEmployees: number;
+  departmentCounts: DepartmentCount[];
+}
+
+export const AnalyticsResponseSchema = z.object({
+  totalEmployees: z.number(),
+  departmentCounts: z.array(
+    z.object({
+      department: z.string(),
+      count: z.number(),
+    })
+  ),
 });
 
 /**

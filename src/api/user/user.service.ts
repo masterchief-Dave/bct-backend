@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 
-import { User } from "@/api/user/user.model";
+import { ExtendedUser, IUser, User } from "@/api/user/user.model";
 import { ServiceResponse } from "@/common/models/serviceResponse";
 import { logger } from "@/server";
 

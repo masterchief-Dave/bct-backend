@@ -3,10 +3,10 @@ import express, { type Router } from "express";
 import { z } from "zod";
 
 import { createApiResponse } from "@/api-docs/openAPIResponseBuilders";
-import { UserRole } from "@/api/user/user.model";
 import { validateRequest } from "@/common/utils/httpHandlers";
 import {
   GetUserSchema,
+  UserRoleEnum,
   UserUpdateValidationSchema,
   UserValidationSchema,
 } from "@/common/utils/schema";
@@ -51,6 +51,7 @@ userRegistry.registerPath({
 userRouter.patch(
   "/:id",
   validateRequest(UserUpdateValidationSchema),
+  authController.restrictTo(UserRoleEnum.ADMIN),
   userController.updateEmployeeRecord
 );
 
@@ -64,6 +65,6 @@ userRegistry.registerPath({
 userRouter.delete(
   "/:id",
   validateRequest(GetUserSchema),
-  authController.restrictTo(UserRole.ADMIN),
+  authController.restrictTo(UserRoleEnum.ADMIN),
   userController.deleteUser
 );
