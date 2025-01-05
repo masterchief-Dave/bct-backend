@@ -13,6 +13,6 @@
 #### Step 3: 🏃‍♂️ Running the Project
 
 - Development Mode: `npm run dev`
-- Swagger docs running at `http://localhost:8000`
+- Swagger docs running at `http://localhost:8080`
 - Building: `npm run build`
 - Production Mode: Set `.env` to `NODE_ENV="production"` then `npm run build && npm run start`
