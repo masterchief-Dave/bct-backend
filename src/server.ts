@@ -1,6 +1,7 @@
 import cors from "cors";
 import express, { type Express } from "express";
 import helmet from "helmet";
+import mongoose from "mongoose";
 import { pino } from "pino";
 
 import { openAPIRouter } from "@/api-docs/openAPIRouter";
@@ -10,20 +11,26 @@ import errorHandler from "@/common/middleware/errorHandler";
 import rateLimiter from "@/common/middleware/rateLimiter";
 import requestLogger from "@/common/middleware/requestLogger";
 import { env } from "@/common/utils/envConfig";
-import { MongoClient } from "mongodb";
+import { authRouter } from "./api/auth/auth.router";
+import { employeeRouter } from "./api/employee/employee.router";
+import { analyticsRouter } from "./api/analytics/analytics.router";
 
 const logger = pino({ name: "server start" });
 const app: Express = express();
 
 // Connect to Database
-async function run() {
-  const client = new MongoClient(env.MONGODB_URI);
-  await client.connect();
-  logger.info("Connected to MongoDB");
+async function connectToDB(): Promise<void> {
+  try {
+    const uri = env.MONGODB_URI;
+    if (!uri) throw new Error("MongoDB uri is not defined");
+    await mongoose.connect(uri);
+    console.log("📦 Connected to MongoDB");
+  } catch (error) {
+    logger.error("MongoDB connection error: ", error);
+    process.exit(1);
+  }
 }
-
-run().catch(console.dir);
-
+connectToDB().catch(console.dir);
 // Set the application to trust the reverse proxy
 app.set("trust proxy", true);
 
@@ -40,6 +47,9 @@ app.use(requestLogger);
 // Routes
 app.use("/health-check", healthCheckRouter);
 app.use("/users", userRouter);
+app.use("/auth", authRouter);
+app.use("/employees", employeeRouter);
+app.use("/analytics", analyticsRouter);
 
 // Swagger UI
 app.use(openAPIRouter);
